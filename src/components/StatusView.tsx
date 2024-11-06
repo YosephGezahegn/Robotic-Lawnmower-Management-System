@@ -15,7 +15,6 @@ const StatusView: React.FC = () => {
 
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Battery Level</h3>
-        <BatteryIndicator level={batteryLevel} />
         <p className="text-gray-600">Current Level: {batteryLevel}%</p>
       </div>
 
