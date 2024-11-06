@@ -59,9 +59,9 @@ const BatteryChart: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <Line options={options} data={data} />
-    </div>
+    <div className="chart-container bg-white p-4 rounded-lg shadow-md">
+    <Line options={options} data={data} />
+  </div>
   );
 }
 

@@ -5,15 +5,26 @@ interface Location {
   lat: number;
   lng: number;
 }
+interface BatteryHistoryEntry {
+  timestamp: string;
+  level: number;
+}
+interface Schedule {
+  startTime: string;
+  endTime: string;
+  daysOfWeek: string[];
+}
+
 
 interface MowingSession {
+  distance: number;
   id: string;
   startTime: string;
   endTime: string | null;
   batteryUsage: number;
-  distanceCovered: number; // Consider renaming this to match your updateSession payload
+  distanceCovered: number; // This is used to track distance during the session
   location: Location;
-  duration?: number; // Add this property if you need to update it
+  duration: number; // Added duration property
 }
 
 interface Notification {
@@ -34,19 +45,24 @@ interface MowerSettings {
 interface MowerState {
   batteryLevel: number;
   currentLocation: Location;
-  operationalStatus: 'active' | 'idle' | 'charging' | 'error';
+  operationalStatus: 'active' | 'idle' | 'charging' | 'error'; // This is the type for operationalStatus
+  status: string;
   currentSession: MowingSession | null;
-  sessions: MowingSession[]; // Updated to MowingSession[]
+  sessions: MowingSession[];
   notifications: Notification[];
   settings: MowerSettings;
-  batteryHistory: { timestamp: string; level: number }[]; // Ensure this is correctly typed
+  batteryHistory: BatteryHistoryEntry[];
+  schedule: Schedule | null;
 }
 
 const initialState: MowerState = {
-  batteryHistory: [],
   batteryLevel: 100,
-  currentLocation: { lat: 40.7128, lng: -74.006 },
+  currentLocation: {
+    lat: 60.16750,
+    lng: 24.94778,
+  },
   operationalStatus: 'idle',
+  status: 'idle', // Initialize with a default value
   currentSession: null,
   sessions: [],
   notifications: [],
@@ -56,6 +72,8 @@ const initialState: MowerState = {
     mowingHeight: 2.5,
     notificationsEnabled: true,
   },
+  batteryHistory: [],
+  schedule: null
 };
 
 const mowerSlice = createSlice({
@@ -74,15 +92,18 @@ const mowerSlice = createSlice({
         };
         state.notifications.push(notification);
       }
-    },
-    updateLocation: (state, action: PayloadAction<Location>) => {
+      state.batteryHistory.push({
+        timestamp: new Date().toISOString(),
+        level: action.payload,
+      });
+    },scheduleMowing: (state, action: PayloadAction<Schedule>) => {
+      state.schedule = action.payload;
+      console.log('Scheduled mowing:', action.payload);
+    },updateLocation: (state, action: PayloadAction<Location>) => {
       state.currentLocation = action.payload;
     },
-    updateStatus: (
-      state,
-      action: PayloadAction<MowerState['operationalStatus']>
-    ) => {
-      state.operationalStatus = action.payload;
+    updateStatus: (state, action: PayloadAction<string>) => {
+      state.status = action.payload.toLowerCase(); // Convert status to lowercase
     },
     startSession: (state) => {
       const newSession: MowingSession = {
@@ -90,8 +111,10 @@ const mowerSlice = createSlice({
         startTime: new Date().toISOString(),
         endTime: null,
         batteryUsage: 0,
-        distanceCovered: 0,
+        distanceCovered: 0, // Initialize with zero
         location: state.currentLocation,
+        duration: 0, // Initialize duration as zero
+        distance:0
       };
       state.currentSession = newSession;
       state.sessions.push(newSession);
@@ -101,7 +124,7 @@ const mowerSlice = createSlice({
       if (state.currentSession) {
         state.currentSession.endTime = new Date().toISOString();
         state.operationalStatus = 'idle';
-        // You may want to calculate final batteryUsage and distanceCovered here
+        // Calculate final batteryUsage and distanceCovered here if necessary
         state.currentSession = null;
       }
     },
@@ -152,6 +175,7 @@ const mowerSlice = createSlice({
   },
 });
 
+// Export actions and selectors
 export const {
   updateBatteryLevel,
   updateLocation,
@@ -163,6 +187,7 @@ export const {
   markNotificationAsRead,
   clearNotifications,
   updateSettings,
+  scheduleMowing
 } = mowerSlice.actions;
 
 // Selectors

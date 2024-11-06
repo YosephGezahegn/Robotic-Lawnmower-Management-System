@@ -15,7 +15,7 @@ const BatteryIndicator: React.FC = () => {
 
   return (
     <div className="flex items-center space-x-2">
-      {status === 'Charging' ? (
+      {status === 'charging' ? (
         <BatteryCharging className={`w-6 h-6 ${getBatteryColor()}`} />
       ) : (
         <Battery className={`w-6 h-6 ${getBatteryColor()}`} />

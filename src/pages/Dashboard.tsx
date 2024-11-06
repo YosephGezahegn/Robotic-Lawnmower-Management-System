@@ -5,6 +5,7 @@ import {
   updateSession,
   addNotification,
   selectCurrentSession,
+  startSession, // Import this action
 } from '../store/mowerSlice';
 import BatteryIndicator from '../components/BatteryIndicator';
 import StatusBadge from '../components/StatusBadge';
@@ -19,12 +20,12 @@ const Dashboard: React.FC = () => {
   const session = useSelector(selectCurrentSession);
 
   useEffect(() => {
+ 
     const interval = setInterval(() => {
-      dispatch(
-        updateBatteryLevel(Math.max(20, Math.floor(Math.random() * 100)))
-      );
+      const newBatteryLevel = Math.max(20, Math.floor(Math.random() * 100));
+      dispatch(updateBatteryLevel(newBatteryLevel));
       if (session) {
-        dispatch(
+        dispatch(startSession(),
           updateSession({
             id: session.id, // Ensure to use the session ID
             updates: {
@@ -100,7 +101,7 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Duration</span>
                 <span className="font-semibold">
-                  {session ? session.duration : 0} minutes
+                  {session?session.duration : 0} minutes
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -126,6 +127,8 @@ const Dashboard: React.FC = () => {
         {/* Control Panel */}
         <div className="mt-8">
           <ControlPanel />
+        </div>
+        <div className="mt-8">
         </div>
       </div>
     </div>

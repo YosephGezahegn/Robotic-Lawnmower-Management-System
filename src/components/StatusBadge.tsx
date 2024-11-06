@@ -8,11 +8,11 @@ const StatusBadge: React.FC = () => {
 
   const getStatusColor = () => {
     switch (status) {
-      case 'Active':
+      case 'active':
         return 'text-green-500';
-      case 'Idle':
+      case 'idle':
         return 'text-yellow-500';
-      case 'Charging':
+      case 'charging':
         return 'text-blue-500';
       default:
         return 'text-gray-500';
