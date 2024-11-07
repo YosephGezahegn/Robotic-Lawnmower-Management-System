@@ -113,8 +113,8 @@ const mowerSlice = createSlice({
         batteryUsage: 0,
         distanceCovered: 0, // Initialize with zero
         location: state.currentLocation,
-        duration: 0, // Initialize duration as zero
-        distance:0
+        duration: 20, // Initialize duration as zero
+        distance:10
       };
       state.currentSession = newSession;
       state.sessions.push(newSession);

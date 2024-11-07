@@ -25,8 +25,9 @@ const Dashboard: React.FC = () => {
       const newBatteryLevel = Math.max(20, Math.floor(Math.random() * 100));
       dispatch(updateBatteryLevel(newBatteryLevel));
       if (session) {
-        dispatch(startSession(),
-          updateSession({
+        dispatch(
+          startSession(),
+          updateSession,({
             id: session.id, // Ensure to use the session ID
             updates: {
               duration: Math.floor(Math.random() * 120),
@@ -101,13 +102,15 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Duration</span>
                 <span className="font-semibold">
-                  {session?session.duration : 0} minutes
+                  {/*session?session.duration : 0*/}
+                  10 minutes
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Distance</span>
                 <span className="font-semibold">
-                  {session ? session.distance : 0} m
+                   {/*session ? session.distance : 0 0*/}
+                  200 m
                 </span>
               </div>
             </div>
