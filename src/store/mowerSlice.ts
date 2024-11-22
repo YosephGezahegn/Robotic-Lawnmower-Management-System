@@ -5,16 +5,17 @@ interface Location {
   lat: number;
   lng: number;
 }
+
 interface BatteryHistoryEntry {
   timestamp: string;
   level: number;
 }
+
 interface Schedule {
   startTime: string;
   endTime: string;
   daysOfWeek: string[];
 }
-
 
 interface MowingSession {
   distance: number;
@@ -22,9 +23,9 @@ interface MowingSession {
   startTime: string;
   endTime: string | null;
   batteryUsage: number;
-  distanceCovered: number; // This is used to track distance during the session
+  distanceCovered: number; 
   location: Location;
-  duration: number; // Added duration property
+  duration: number; 
 }
 
 interface Notification {
@@ -42,10 +43,23 @@ interface MowerSettings {
   notificationsEnabled: boolean;
 }
 
+interface Device {
+  id: string;
+  name: string;
+  status: 'online' | 'offline';
+  batteryLevel: number;
+  lastConnected: string;
+  model: string;
+  serialNumber: string;
+  firmware: string;
+  connected: boolean;
+  operationalStatus: 'mowing' | 'charging' | 'idle' | 'error';
+}
+
 interface MowerState {
   batteryLevel: number;
   currentLocation: Location;
-  operationalStatus: 'active' | 'idle' | 'charging' | 'error'; // This is the type for operationalStatus
+  operationalStatus: 'active' | 'idle' | 'charging' | 'error'; 
   status: string;
   currentSession: MowingSession | null;
   sessions: MowingSession[];
@@ -53,6 +67,7 @@ interface MowerState {
   settings: MowerSettings;
   batteryHistory: BatteryHistoryEntry[];
   schedule: Schedule | null;
+  connectedDevices: Device[];
 }
 
 const initialState: MowerState = {
@@ -62,7 +77,7 @@ const initialState: MowerState = {
     lng: 24.94778,
   },
   operationalStatus: 'idle',
-  status: 'idle', // Initialize with a default value
+  status: 'idle', 
   currentSession: null,
   sessions: [],
   notifications: [],
@@ -73,7 +88,45 @@ const initialState: MowerState = {
     notificationsEnabled: true,
   },
   batteryHistory: [],
-  schedule: null
+  schedule: null,
+  connectedDevices: [
+    {
+      id: 'mower-1',
+      name: 'Front Yard Mower',
+      status: 'online',
+      batteryLevel: 85,
+      lastConnected: new Date().toISOString(),
+      model: 'AutoMow 500X',
+      serialNumber: 'AM500X-123456',
+      firmware: '2.1.0',
+      connected: true,
+      operationalStatus: 'mowing'
+    },
+    {
+      id: 'mower-2',
+      name: 'Backyard Mower',
+      status: 'online',
+      batteryLevel: 30,
+      lastConnected: new Date(Date.now() - 3600000).toISOString(),
+      model: 'AutoMow 300',
+      serialNumber: 'AM300-789012',
+      firmware: '2.0.9',
+      connected: true,
+      operationalStatus: 'charging'
+    },
+    {
+      id: 'mower-3',
+      name: 'Side Yard Mower',
+      status: 'offline',
+      batteryLevel: 0,
+      lastConnected: new Date(Date.now() - 86400000).toISOString(),
+      model: 'AutoMow 300',
+      serialNumber: 'AM300-345678',
+      firmware: '2.0.9',
+      connected: false,
+      operationalStatus: 'idle'
+    }
+  ]
 };
 
 const mowerSlice = createSlice({
@@ -96,14 +149,16 @@ const mowerSlice = createSlice({
         timestamp: new Date().toISOString(),
         level: action.payload,
       });
-    },scheduleMowing: (state, action: PayloadAction<Schedule>) => {
+    },
+    scheduleMowing: (state, action: PayloadAction<Schedule>) => {
       state.schedule = action.payload;
       console.log('Scheduled mowing:', action.payload);
-    },updateLocation: (state, action: PayloadAction<Location>) => {
+    },
+    updateLocation: (state, action: PayloadAction<Location>) => {
       state.currentLocation = action.payload;
     },
     updateStatus: (state, action: PayloadAction<string>) => {
-      state.status = action.payload.toLowerCase(); // Convert status to lowercase
+      state.status = action.payload.toLowerCase(); 
     },
     startSession: (state) => {
       const newSession: MowingSession = {
@@ -111,9 +166,9 @@ const mowerSlice = createSlice({
         startTime: new Date().toISOString(),
         endTime: null,
         batteryUsage: 0,
-        distanceCovered: 0, // Initialize with zero
+        distanceCovered: 0, 
         location: state.currentLocation,
-        duration: 20, // Initialize duration as zero
+        duration: 20, 
         distance:10
       };
       state.currentSession = newSession;
@@ -124,7 +179,6 @@ const mowerSlice = createSlice({
       if (state.currentSession) {
         state.currentSession.endTime = new Date().toISOString();
         state.operationalStatus = 'idle';
-        // Calculate final batteryUsage and distanceCovered here if necessary
         state.currentSession = null;
       }
     },
@@ -172,10 +226,24 @@ const mowerSlice = createSlice({
     updateSettings: (state, action: PayloadAction<Partial<MowerSettings>>) => {
       state.settings = { ...state.settings, ...action.payload };
     },
+    addDevice: (state, action: PayloadAction<Device>) => {
+      state.connectedDevices.push(action.payload);
+    },
+    removeDevice: (state, action: PayloadAction<string>) => {
+      state.connectedDevices = state.connectedDevices.filter(
+        device => device.id !== action.payload
+      );
+    },
+    updateDeviceStatus: (state, action: PayloadAction<{ id: string; status: 'online' | 'offline' }>) => {
+      const device = state.connectedDevices.find(d => d.id === action.payload.id);
+      if (device) {
+        device.status = action.payload.status;
+        device.lastConnected = new Date().toISOString();
+      }
+    }
   },
 });
 
-// Export actions and selectors
 export const {
   updateBatteryLevel,
   updateLocation,
@@ -187,10 +255,12 @@ export const {
   markNotificationAsRead,
   clearNotifications,
   updateSettings,
-  scheduleMowing
+  scheduleMowing,
+  addDevice,
+  removeDevice,
+  updateDeviceStatus
 } = mowerSlice.actions;
 
-// Selectors
 export const selectBatteryLevel = (state: RootState) =>
   state.mower.batteryLevel;
 export const selectLocation = (state: RootState) => state.mower.currentLocation;
@@ -203,5 +273,6 @@ export const selectSession = (state: RootState, sessionId: string) =>
 export const selectNotifications = (state: RootState) =>
   state.mower.notifications;
 export const selectSettings = (state: RootState) => state.mower.settings;
+export const selectConnectedDevices = (state: RootState) => state.mower.connectedDevices;
 
 export default mowerSlice.reducer;

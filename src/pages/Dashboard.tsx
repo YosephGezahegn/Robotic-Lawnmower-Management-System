@@ -12,6 +12,7 @@ import StatusBadge from '../components/StatusBadge';
 import ControlPanel from '../components/ControlPanel';
 import BatteryChart from '../components/BatteryChart';
 import Notifications from '../components/Notifications';
+import ConnectedDevices from '../components/ConnectedDevices';
 import Map from '../components/Map';
 import { MapPin, Clock } from 'lucide-react';
 
@@ -68,6 +69,11 @@ const Dashboard: React.FC = () => {
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Connected Devices */}
+          <div className="lg:col-span-3">
+            <ConnectedDevices />
+          </div>
+
           {/* Status Cards */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
             <div className="space-y-4">
